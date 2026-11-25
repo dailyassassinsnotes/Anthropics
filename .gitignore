@@ -1,0 +1,30 @@
+# Secrets and credentials: never commit
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*.token
+credentials*.json
+secrets*.json
+
+# Files Claude Code generates inside a mod folder
+.claude-plugin/types/
+Mods/*/.claude-plugin/types/
+
+# Dependencies, logs, backups
+node_modules/
+*.log
+*.bak
+*.bak-*
+*.tmp
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

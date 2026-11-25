@@ -1,0 +1,12 @@
+{
+  "name": "ghostprompts-mods",
+  "owner": { "name": "dailyassassinsnotes" },
+  "description": "Collection of Claude Code mods (MIT).",
+  "plugins": [
+    {
+      "name": "ghost",
+      "source": "./Mods/GhostPrompts",
+      "description": "Ghost Prompt Master: a button above the prompt box and /ghost, /prompt-master to turn a rough prompt into a precise one. Never sends it."
+    }
+  ]
+}

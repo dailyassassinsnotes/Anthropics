@@ -1,0 +1,7 @@
+{
+  "name": "ghost",
+  "version": "1.1.0",
+  "description": "Ghost Prompt Master: a button above the prompt box and /ghost, /prompt-master to turn a rough prompt into a precise one. Never sends it.",
+  "types": "./types/index.d.ts",
+  "license": "MIT"
+}
