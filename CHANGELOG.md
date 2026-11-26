@@ -16,6 +16,15 @@ versions follow [Semantic Versioning](https://semver.org/lang/id/).
 
 ## GhostPrompts (`ghost`)
 
+### [2.5.1] — 2026-11-27
+#### Changed
+- Versions 2.0 to 2.5.1 in one update; see the "New in" sections of `Mods/GhostPrompts/README.md`.
+- Project tips run right to left in the pill as a seamless marquee, with gold glints moving left to right; reduced motion shows the first tip still.
+- The band row is the ghost, the pill, then a dropdown (Ghost / Show) directly right of the pill, with no caption; a Stop button stands in its place while Ghost works.
+- The percentage counts 1% at a time as native text, so nothing reloads between the press and 100%.
+#### Added
+- AI project tips, the Ghost Crew pane (`/ghost-crew`), role characters, `/ghost-tips on|off`.
+
 ### [1.1.0] — 2026-11-26
 #### Changed
 - New look: an animated vector ghost beside a gold Ghost button, and a gold hologram-grain effect while Ghost works (desktop). Animations are CSS-only and stop under reduced motion.

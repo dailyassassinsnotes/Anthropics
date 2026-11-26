@@ -137,22 +137,39 @@ export type ParsedReply =
   | { kind: 'questions'; questions: GhostQuestion[] }
   | { kind: 'unreadable' }
 
-const between = (text: string, open: string, close: string): string | undefined => {
-  const start = text.indexOf(open)
-  const end = text.lastIndexOf(close)
-  if (start < 0 || end < start + open.length) return undefined
-  return text.slice(start + open.length, end)
+// What stands between the first <name> and the last </name>. The tag's name is
+// read in any case and with blanks inside the brackets ("< Prompt >", "</ notes>").
+const between = (text: string, name: string): string | undefined => {
+  const open = new RegExp(`<\\s*${name}\\s*>`, 'i').exec(text)
+  if (open === null) return undefined
+  const start = open.index + open[0].length
+  let end = -1
+  for (const close of text.matchAll(new RegExp(`<\\s*/\\s*${name}\\s*>`, 'gi'))) end = close.index ?? -1
+  if (end < start) return undefined
+  return text.slice(start, end)
+}
+
+// A reply that is one Markdown code fence (```xml, ```text, ```markdown or a
+// bare one) around the tags: the fence is taken off, once. Anything else is
+// left as it came.
+const unfence = (reply: string): string => {
+  const hit = /^\s*(`{3,})(?:xml|text|markdown)?[ \t]*\r?\n([\s\S]*?)\r?\n?[ \t]*\1\s*$/i.exec(reply)
+  return hit === null ? reply : (hit[2] ?? reply)
 }
 
 const trimBlankLines = (text: string) => text.replace(/^\s*\n/, '').replace(/\n\s*$/, '')
 
-export const parseReply = (reply: string): ParsedReply => {
-  const prompt = between(reply, '<prompt>', '</prompt>')
+// The tags may come wrapped in one code fence or padded with blanks (2.4). A
+// reply without the tags stays unreadable: plain text is never taken for the
+// prompt.
+export const parseReply = (wire: string): ParsedReply => {
+  const reply = unfence(wire)
+  const prompt = between(reply, 'prompt')
   if (prompt !== undefined && prompt.trim() !== '') {
-    const notes = between(reply, '<notes>', '</notes>') ?? ''
+    const notes = between(reply, 'notes') ?? ''
     return { kind: 'prompt', prompt: trimBlankLines(prompt), notes: notes.trim() }
   }
-  const raw = between(reply, '<questions>', '</questions>')
+  const raw = between(reply, 'questions')
   if (raw !== undefined) {
     try {
       const list: unknown = JSON.parse(raw.trim())

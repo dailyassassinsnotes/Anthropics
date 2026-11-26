@@ -3,6 +3,7 @@ import { expect, test } from 'claude-code/testing'
 import { GHOST_IDLE_SVG, GHOST_WORKING_SVG } from '../hooks/art'
 import { EMPTY_MESSAGE, MAX_QUESTIONS, fence, improve, makeRedactor, parseReply } from '../hooks/core'
 import type { Completion, GhostQuestion } from '../hooks/core'
+import { go, pillNow } from './band'
 
 const USAGE = { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 }
 const answered = (text: string) => ({ value: { isAnswered: true, text, usage: USAGE } })
@@ -134,7 +135,7 @@ for (const surface of ['terminal', 'desktop'] as const) {
     })
 
     const ui = await $.ui.mount(band(surface))
-    await ui.press({ key: 'ghost' })
+    await go(ui)
     expect(toasts).toEqual([EMPTY_MESSAGE])
     expect(calls).toBe(0)
     await ui.unmount()
@@ -164,7 +165,7 @@ for (const surface of ['terminal', 'desktop'] as const) {
     on('model.complete', () => answered('<prompt>Role: web designer\nTask: [BAKERY NAME] site</prompt><notes>n</notes>'))
 
     const ui = await $.ui.mount(band(surface))
-    await ui.press({ key: 'ghost' })
+    await go(ui)
     expect(fills).toEqual([{ text: 'Role: web designer\nTask: [BAKERY NAME] site', mode: 'replace' }])
     expect(submitted).toEqual([])
     expect(statuses).toEqual(['Ghost is improving your prompt...', undefined])
@@ -198,7 +199,7 @@ for (const surface of ['terminal', 'desktop'] as const) {
     on('model.complete', () => answered('<prompt>better</prompt>'))
 
     const ui = await $.ui.mount(band(surface))
-    await ui.press({ key: 'ghost' })
+    await go(ui)
     expect(fills).toEqual([])
     expect(opened).toEqual(['ghost'])
     await ui.unmount()
@@ -221,7 +222,7 @@ for (const surface of ['terminal', 'desktop'] as const) {
     }))
 
     const ui = await $.ui.mount(band(surface))
-    await ui.press({ key: 'ghost' })
+    await go(ui)
     expect(fills).toEqual([])
     expect(toasts.length).toBe(1)
     expect(toasts[0]?.startsWith('Ghost could not improve the prompt')).toBe(true)
@@ -253,7 +254,7 @@ test('an empty box whose fill is refused for an unknown cause says the empty mes
   })
 
   const ui = await $.ui.mount(band('desktop'))
-  await ui.press({ key: 'ghost' })
+  await go(ui)
   expect(toasts).toEqual([EMPTY_MESSAGE])
   expect(opened).toEqual([])
   expect(calls).toBe(0)
@@ -331,13 +332,19 @@ test('a Ghost command that reaches the prompt path is answered and dropped, neve
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u
 
 for (const surface of ['terminal', 'desktop'] as const) {
-  test(`${surface}: the band has no emoji and a gold Ghost label`, async ($, on) => {
+  test(`${surface}: the band has no emoji and Ghost's gold`, async ($, on) => {
     on('prompt.read', () => ({ value: { text: '', cursor: 0 } }))
     const ui = await $.ui.mount(band(surface))
     const tree = JSON.stringify(await ui.drawn())
     expect(EMOJI.test(tree)).toBe(false)
-    expect(tree.includes('#AA8231')).toBe(true)
-    expect(tree.includes('#17130C')).toBe(true)
+    if (surface === 'terminal') {
+      // The gold button: ink on gold.
+      expect(tree.includes('#AA8231')).toBe(true)
+      expect(tree.includes('#17130C')).toBe(true)
+    } else {
+      // The pill: a gold rim on the charcoal fill, champagne words.
+      for (const colour of ['#C9A24A', '#1F1B16', '#F6E7B8']) expect(tree.includes(colour)).toBe(true)
+    }
     const art = await ui.find({ type: 'Svg' })
     if (surface === 'desktop') expect(art !== undefined).toBe(true)
     else expect(art).toBe(undefined)
@@ -352,4 +359,16 @@ test('the art is safe for a sandboxed frame and honours reduced motion', async (
     expect(svg.includes('prefers-reduced-motion')).toBe(true)
     expect(svg.length < 131072).toBe(true)
   }
+})
+
+test('desktop: the words are native Text in the pill, then the Ghost dropdown; nothing beside them', async ($, on) => {
+  on('prompt.read', () => ({ value: { text: '', cursor: 0 } }))
+  const ui = await $.ui.mount(band('desktop'))
+  const pill = await pillNow(ui)
+  expect(pill.label).toBe('Improve the draft below')
+  expect((await ui.find({ type: 'Text', text: /Improve the draft below/ })) !== undefined).toBe(true)
+  // No drawing holds the words.
+  expect(pill.sources.some(source => source.includes('Improve the draft'))).toBe(false)
+  expect(pill.row).toEqual(['Svg:', 'Box:', 'Select:ghost-menu']) // the ghost, the pill, the dropdown directly after it
+  await ui.unmount()
 })
