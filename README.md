@@ -9,7 +9,7 @@ all made by the repository owner, **dailyassassinsnotes**.
 
 | Mod | Plugin | Version | What it does |
 | --- | --- | --- | --- |
-| [GhostPrompts](https://github.com/dailyassassinsnotes/Anthropics/tree/main/Mods/GhostPrompts) | `ghost` | 1.1.0 | Turns a rough prompt into a precise, ready-to-send one: a gold **Ghost** button with an animated ghost above the prompt box, plus `/ghost`, `/prompt-master` and `/ghost-undo`. Never sends a prompt by itself. |
+| [GhostPrompts](https://github.com/dailyassassinsnotes/Anthropics/tree/main/Mods/GhostPrompts) | `ghost` | 2.5.1 | Turns a rough prompt into a precise, ready-to-send one: a gold **Ghost** button with an animated ghost above the prompt box, plus `/ghost`, `/prompt-master` and `/ghost-undo`. Never sends a prompt by itself. |
 
 Full documentation, installation and usage: [GhostPrompts](https://github.com/dailyassassinsnotes/Anthropics/tree/main/Mods/GhostPrompts).
 
